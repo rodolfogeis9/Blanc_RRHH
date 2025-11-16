@@ -1,5 +1,6 @@
 import { Box, Flex, Heading, Spacer, Text, Button } from '@chakra-ui/react';
 import { useAuth } from '../../context/AuthContext';
+import BlancLogo from '../branding/BlancLogo';
 
 const Header = () => {
   const { auth, logout } = useAuth();
@@ -16,11 +17,8 @@ const Header = () => {
       gap={4}
     >
       <Flex align="center" gap={3}>
-        <Box boxSize="48px" bg="brand.secondary" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
-          {/* Reemplaza por el logo oficial colocando el archivo PNG en src/assets/logo.png */}
-          <Text fontWeight="bold" color="brand.primary">
-            BL
-          </Text>
+        <Box boxSize="64px">
+          <BlancLogo w="64px" h="auto" />
         </Box>
         <Box>
           <Heading size="md" color="brand.primary">
