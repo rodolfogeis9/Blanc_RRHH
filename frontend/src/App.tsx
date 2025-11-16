@@ -12,6 +12,10 @@ import EmployeeProfilePage from "./pages/employee/EmployeeProfilePage";
 import EmployeeDocumentsPage from "./pages/employee/EmployeeDocumentsPage";
 import EmployeeVacationsPage from "./pages/employee/EmployeeVacationsPage";
 import EmployeeLicensesPage from "./pages/employee/EmployeeLicensesPage";
+import EmployeeEducationPage from "./pages/employee/EmployeeEducationPage";
+import EmployeeWorkHistoryPage from "./pages/employee/EmployeeWorkHistoryPage";
+import EmployeeRemunerationsPage from "./pages/employee/EmployeeRemunerationsPage";
+import EmployeeExtraHoursPage from "./pages/employee/EmployeeExtraHoursPage";
 
 import AdminEmployeesPage from "./pages/admin/AdminEmployeesPage";
 import AdminVacationsPage from "./pages/admin/AdminVacationsPage";
@@ -33,9 +37,13 @@ function App() {
         <Route element={<ProtectedRoute roles={['EMPLEADO']} />}>
           <Route path="/portal" element={<EmployeeDashboard />} />
           <Route path="/portal/mis-datos" element={<EmployeeProfilePage />} />
+          <Route path="/portal/educacion" element={<EmployeeEducationPage />} />
+          <Route path="/portal/antecedentes-laborales" element={<EmployeeWorkHistoryPage />} />
           <Route path="/portal/documentos" element={<EmployeeDocumentsPage />} />
           <Route path="/portal/vacaciones" element={<EmployeeVacationsPage />} />
           <Route path="/portal/licencias" element={<EmployeeLicensesPage />} />
+          <Route path="/portal/remuneraciones" element={<EmployeeRemunerationsPage />} />
+          <Route path="/portal/horas-extras" element={<EmployeeExtraHoursPage />} />
         </Route>
 
         {/* Portal administración */}
