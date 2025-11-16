@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { prisma } from '../common/prisma.js';
+import { prisma } from '../common/prisma';
 
 export const listAuditEvents = async (filters: {
   usuarioId?: string;

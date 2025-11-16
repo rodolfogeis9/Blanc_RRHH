@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
-import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth.js';
-import { listOwnDocuments, listEmployeeDocuments, uploadDocument } from '../modules/documents/documents.service.js';
-import { AppError } from '../utils/errors.js';
+import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth';
+import { listOwnDocuments, listEmployeeDocuments, uploadDocument } from '../modules/documents/documents.service';
+import { AppError } from '../utils/errors';
 
 const upload = multer({
   storage: multer.memoryStorage(),

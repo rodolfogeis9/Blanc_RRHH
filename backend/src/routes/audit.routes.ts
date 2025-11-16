@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticate, requireRoles } from '../middleware/auth.js';
-import { listAuditEvents } from '../modules/audit/audit.service.js';
+import { authenticate, requireRoles } from '../middleware/auth';
+import { listAuditEvents } from '../modules/audit/audit.service';
 
 const router = Router();
 

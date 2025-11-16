@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { login, createPasswordResetToken, resetPassword } from '../modules/auth/auth.service.js';
+import { login, createPasswordResetToken, resetPassword } from '../modules/auth/auth.service';
 
 const router = Router();
 

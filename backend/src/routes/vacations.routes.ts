@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth.js';
+import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 import {
   listOwnVacationRequests,
   listVacationRequests,
   createVacationRequest,
   approveVacation,
   rejectVacation,
-} from '../modules/vacations/vacations.service.js';
-import { AppError } from '../utils/errors.js';
+} from '../modules/vacations/vacations.service';
+import { AppError } from '../utils/errors';
 
 const router = Router();
 

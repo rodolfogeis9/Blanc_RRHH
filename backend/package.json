@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Backend API para Blanc RRHH",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc -p tsconfig.json",

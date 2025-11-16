@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { prisma } from '../modules/common/prisma.js';
-import { AppError, NotFoundError } from '../utils/errors.js';
+import { prisma } from '../modules/common/prisma';
+import { AppError, NotFoundError } from '../utils/errors';
 
 export const VACATION_DAYS_PER_MONTH = 1.25;
 

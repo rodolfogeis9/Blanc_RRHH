@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth.js';
+import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 import {
   getCurrentEmployee,
   listEmployees,
   createEmployee,
   updateEmployee,
   adjustEmployeeVacation,
-} from '../modules/employees/employees.service.js';
-import { hashPassword } from '../utils/password.js';
-import { updateOwnProfile } from '../modules/auth/auth.service.js';
-import { AppError } from '../utils/errors.js';
+} from '../modules/employees/employees.service';
+import { hashPassword } from '../utils/password';
+import { updateOwnProfile } from '../modules/auth/auth.service';
+import { AppError } from '../utils/errors';
 
 const router = Router();
 

@@ -1,8 +1,8 @@
 import type { Express } from 'express';
 import { TipoDocumento } from '@prisma/client';
-import { prisma } from '../common/prisma.js';
-import { storageService } from '../../services/storage-service.js';
-import { NotFoundError } from '../../utils/errors.js';
+import { prisma } from '../common/prisma';
+import { storageService } from '../../services/storage-service';
+import { NotFoundError } from '../../utils/errors';
 
 export const listOwnDocuments = async (usuarioId: string, filters: { tipoDocumento?: TipoDocumento; periodo?: string }) => {
   return prisma.documento.findMany({

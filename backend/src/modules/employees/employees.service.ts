@@ -1,7 +1,7 @@
 import { Prisma, RolUsuario, EstadoLaboral } from '@prisma/client';
-import { prisma } from '../common/prisma.js';
-import { ForbiddenError, NotFoundError } from '../../utils/errors.js';
-import { getEmployeeVacationBalance, adjustVacationDays } from '../../services/vacation-service.js';
+import { prisma } from '../common/prisma';
+import { ForbiddenError, NotFoundError } from '../../utils/errors';
+import { getEmployeeVacationBalance, adjustVacationDays } from '../../services/vacation-service';
 
 export const getCurrentEmployee = async (id: string) => {
   const empleado = await prisma.usuario.findUnique({ where: { id } });

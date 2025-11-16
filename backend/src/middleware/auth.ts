@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { verifyJwt } from '../utils/jwt.js';
-import { UnauthorizedError, ForbiddenError } from '../utils/errors.js';
+import { verifyJwt } from '../utils/jwt';
+import { UnauthorizedError, ForbiddenError } from '../utils/errors';
 
 export type AuthenticatedRequest = Request & {
   user?: {

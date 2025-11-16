@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import { EstadoSolicitudVacaciones, RolUsuario } from '@prisma/client';
-import { prisma } from '../common/prisma.js';
-import { NotFoundError, ForbiddenError, AppError } from '../../utils/errors.js';
-import { getEmployeeVacationBalance, handleVacationApproval, handleVacationRejection } from '../../services/vacation-service.js';
+import { prisma } from '../common/prisma';
+import { NotFoundError, ForbiddenError, AppError } from '../../utils/errors';
+import { getEmployeeVacationBalance, handleVacationApproval, handleVacationRejection } from '../../services/vacation-service';
 
 export const listOwnVacationRequests = async (usuarioId: string) => {
   return prisma.solicitudVacaciones.findMany({
