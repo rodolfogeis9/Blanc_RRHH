@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RolUsuario {
+  ADMIN_DIRECCION
+  ADMIN_RRHH
+  EMPLEADO
+}
+
+enum EstadoLaboral {
+  ACTIVO
+  SUSPENDIDO
+  FINIQUITADO
+}
+
+enum TipoDocumento {
+  CONTRATO
+  ANEXO
+  LIQUIDACION
+  ESTUDIO
+  OTRO
+}
+
+enum TipoSolicitudVacaciones {
+  VACACIONES
+  PERMISO_DESCONTADO_DE_VACACIONES
+}
+
+enum EstadoSolicitudVacaciones {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
+
+enum TipoLicenciaMedica {
+  ENFERMEDAD
+  ACCIDENTE
+  MATERNIDAD
+  OTRO
+}
+
+enum TipoEventoAuditoria {
+  CREACION_EMPLEADO
+  CAMBIO_FECHA_INGRESO
+  AJUSTE_VACACIONES
+  APROBACION_VACACIONES
+  RECHAZO_VACACIONES
+  SUBIDA_DOCUMENTO
+  REGISTRO_LICENCIA_MEDICA
+  CAMBIO_ESTADO_LABORAL
+  ACTUALIZACION_DATOS_PERSONALES
+  RESET_PASSWORD
+}
+
+model Usuario {
+  id                       String                @id @default(cuid())
+  rol                      RolUsuario
+  email                    String                @unique
+  passwordHash             String
+  nombre                   String
+  apellido                 String
+  rut                      String                @unique
+  fechaNacimiento          DateTime
+  telefono                 String
+  direccion                String
+  fechaIngreso             DateTime
+  cargo                    String
+  area                     String
+  estadoLaboral            EstadoLaboral         @default(ACTIVO)
+  diasVacacionesAcumulados Float                 @default(0)
+  diasVacacionesTomados    Float                 @default(0)
+  urlFotoPerfil            String?
+  resumenPerfilProfesional String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+
+  documentos               Documento[]
+  solicitudesVacaciones    SolicitudVacaciones[] @relation("SolicitudesEmpleado")
+  licenciasMedicas         LicenciaMedica[]
+  eventosAuditados         EventoAuditoria[]     @relation("EventosPorUsuario")
+  solicitudesAprobadas     SolicitudVacaciones[] @relation("SolicitudesAprobador")
+  documentosSubidos        Documento[]           @relation("DocumentosSubidos")
+  licenciasRegistradas     LicenciaMedica[]      @relation("LicenciasRegistradas")
+  tokensRecuperacion       PasswordResetToken[]
+}
+
+model Documento {
+  id                    String        @id @default(cuid())
+  empleadoId            String
+  empleado              Usuario       @relation(fields: [empleadoId], references: [id])
+  tipoDocumento         TipoDocumento
+  periodo               String?
+  nombreArchivoOriginal String
+  urlArchivo            String
+  subidoPorUsuarioId    String
+  subidoPor             Usuario       @relation("DocumentosSubidos", fields: [subidoPorUsuarioId], references: [id])
+  fechaSubida           DateTime      @default(now())
+}
+
+model SolicitudVacaciones {
+  id                   String                    @id @default(cuid())
+  empleadoId           String
+  empleado             Usuario                   @relation("SolicitudesEmpleado", fields: [empleadoId], references: [id])
+  tipoSolicitud        TipoSolicitudVacaciones
+  fechaInicio          DateTime
+  fechaFin             DateTime
+  cantidadDias         Float
+  estado               EstadoSolicitudVacaciones @default(PENDIENTE)
+  fechaSolicitud       DateTime                  @default(now())
+  aprobadorId          String?
+  aprobador            Usuario?                  @relation("SolicitudesAprobador", fields: [aprobadorId], references: [id])
+  comentarioEmpleado   String?
+  comentarioAprobador  String?
+  fechaResolucion      DateTime?
+  alertaSuperposicion  Boolean                  @default(false)
+}
+
+model LicenciaMedica {
+  id                 String      @id @default(cuid())
+  empleadoId         String
+  empleado           Usuario     @relation(fields: [empleadoId], references: [id])
+  fechaInicio        DateTime
+  fechaFin           DateTime
+  tipo               TipoLicenciaMedica
+  urlArchivoLicencia String
+  observaciones      String?
+  creadoPorUsuarioId String
+  creadoPor          Usuario     @relation("LicenciasRegistradas", fields: [creadoPorUsuarioId], references: [id])
+  fechaRegistro      DateTime    @default(now())
+}
+
+model EventoAuditoria {
+  id              String                @id @default(cuid())
+  usuarioId       String
+  usuario         Usuario               @relation("EventosPorUsuario", fields: [usuarioId], references: [id])
+  tipoEvento      TipoEventoAuditoria
+  entidadAfectada String
+  entidadId       String
+  detalle         String
+  fechaEvento     DateTime              @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}

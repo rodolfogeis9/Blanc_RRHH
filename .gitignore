@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log*
+dist
+.env
+backend/tmp
+backend/node_modules
+frontend/.env.local
+backend/dist
+frontend/dist
+.prisma
+.DS_Store
