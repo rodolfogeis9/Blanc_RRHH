@@ -12,6 +12,8 @@ export type EmployeeMeResponse = {
   area: string;
   cargo: string;
   estadoLaboral: string;
+  fechaIngreso?: string;
+  fechaNacimiento?: string;
   diasVacacionesAcumulados: number;
   diasVacacionesTomados: number;
   saldoVacaciones: number;
