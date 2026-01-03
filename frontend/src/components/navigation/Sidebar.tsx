@@ -5,7 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 const Sidebar = () => {
   const { auth } = useAuth();
   const links = [
-    { to: '/portal', label: 'Dashboard', roles: ['EMPLEADO', 'ADMIN_DIRECCION', 'ADMIN_RRHH'] },
+    { to: '/portal', label: 'Dashboard', roles: ['EMPLEADO'] },
+    { to: '/admin/dashboard', label: 'Dashboard', roles: ['ADMIN_DIRECCION', 'ADMIN_RRHH'] },
     { to: '/portal/mis-datos', label: 'Mis datos', roles: ['EMPLEADO'] },
     { to: '/portal/educacion', label: 'Mis estudios', roles: ['EMPLEADO'] },
     { to: '/portal/antecedentes-laborales', label: 'Mis antecedentes laborales', roles: ['EMPLEADO'] },

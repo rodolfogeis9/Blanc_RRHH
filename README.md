@@ -105,6 +105,12 @@ npm run preview # Sirve el build para validación local
 
 Cada vista incluye estados de carga, mensajes claros y acciones visibles en línea con las guías de usabilidad solicitadas.
 
+### Verificación rápida (manual)
+
+1. Inicia sesión con un usuario ADMIN.
+2. Navega por el menú lateral hacia otras secciones.
+3. Haz clic en **Dashboard** y confirma que mantienes la sesión y el rol ADMIN activos.
+
 ## Despliegue en Google Cloud Platform
 
 1. **Base de datos**: crear una instancia de Cloud SQL (PostgreSQL) y actualizar `DATABASE_URL` con el string de conexión. Utilizar Cloud SQL Proxy o secretos de GCP para inyectar credenciales en Cloud Run.

@@ -11,6 +11,7 @@ import EmployeeLicensesPage from '../pages/employee/EmployeeLicensesPage';
 import AdminEmployeesPage from '../pages/admin/AdminEmployeesPage';
 import AdminVacationsPage from '../pages/admin/AdminVacationsPage';
 import AdminAuditPage from '../pages/admin/AdminAuditPage';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute roles={['ADMIN_DIRECCION', 'ADMIN_RRHH']} />,
     children: [
+      { path: '/admin/dashboard', element: <AdminDashboardPage /> },
       { path: '/admin/empleados', element: <AdminEmployeesPage /> },
       { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
       { path: '/admin/auditoria', element: <AdminAuditPage /> },
