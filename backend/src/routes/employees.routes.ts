@@ -80,6 +80,7 @@ const createSchema = z.object({
   cargo: z.string(),
   area: z.string(),
   estadoLaboral: z.enum(['ACTIVO', 'SUSPENDIDO', 'FINIQUITADO']).default('ACTIVO'),
+  saldoVacacionesInicial: z.number().optional(),
   diasVacacionesAcumulados: z.number().default(0),
   diasVacacionesTomados: z.number().default(0),
 });
@@ -103,6 +104,7 @@ router.post('/', authenticate, requireRoles(['ADMIN_RRHH']), async (req: Authent
         cargo: payload.cargo,
         area: payload.area,
         estadoLaboral: payload.estadoLaboral,
+        saldoVacacionesInicial: payload.saldoVacacionesInicial,
         diasVacacionesAcumulados: payload.diasVacacionesAcumulados,
         diasVacacionesTomados: payload.diasVacacionesTomados,
         rol: 'EMPLEADO',
@@ -143,13 +145,48 @@ router.put('/:id', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH'])
 const adjustSchema = z.object({
   diasVacacionesAcumulados: z.number().optional(),
   diasVacacionesTomados: z.number().optional(),
+  saldoVacacionesInicial: z.number().optional(),
 });
 
-router.put('/:id/vacaciones', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH']), async (req: AuthenticatedRequest, res, next) => {
+router.put('/:id/vacaciones', authenticate, requireRoles(['ADMIN_DIRECCION']), async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) throw new AppError('No autenticado', 401);
     const payload = adjustSchema.parse(req.body);
     const result = await adjustEmployeeVacation(req.params.id, payload, req.user.id, req.user.role);
+    const { passwordHash, ...empleado } = result.empleado;
+    res.json({ empleado, balance: result.balance });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/:id/fecha-ingreso', authenticate, requireRoles(['ADMIN_DIRECCION']), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) throw new AppError('No autenticado', 401);
+    const payload = z.object({ fechaIngreso: z.string() }).parse(req.body);
+    const empleado = await updateEmployee(
+      req.params.id,
+      { fechaIngreso: new Date(payload.fechaIngreso) },
+      req.user.id,
+      req.user.role
+    );
+    const { passwordHash, ...rest } = empleado;
+    res.json(rest);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/:id/vacaciones/saldo-inicial', authenticate, requireRoles(['ADMIN_DIRECCION']), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) throw new AppError('No autenticado', 401);
+    const payload = z.object({ saldoVacacionesInicial: z.number() }).parse(req.body);
+    const result = await adjustEmployeeVacation(
+      req.params.id,
+      { saldoVacacionesInicial: payload.saldoVacacionesInicial },
+      req.user.id,
+      req.user.role
+    );
     const { passwordHash, ...empleado } = result.empleado;
     res.json({ empleado, balance: result.balance });
   } catch (error) {

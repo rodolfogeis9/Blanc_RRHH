@@ -24,7 +24,17 @@ enum TipoDocumento {
   ANEXO
   LIQUIDACION
   ESTUDIO
+  LEGAL
+  CAPACITACION
+  MANUAL
+  CONSENTIMIENTO
+  CERTIFICADO
   OTRO
+}
+
+enum VisibilidadDocumento {
+  SOLO_ADMIN
+  ADMIN_Y_EMPLEADO
 }
 
 enum TipoSolicitudVacaciones {
@@ -33,6 +43,28 @@ enum TipoSolicitudVacaciones {
 }
 
 enum EstadoSolicitudVacaciones {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
+
+enum TipoEducacion {
+  ESTUDIO
+  CERTIFICACION
+  CURSO
+}
+
+enum EstadoEducacion {
+  EN_CURSO
+  COMPLETADO
+}
+
+enum EstadoRemuneracion {
+  PUBLICADA
+  ANULADA
+}
+
+enum EstadoHoraExtra {
   PENDIENTE
   APROBADA
   RECHAZADA
@@ -52,6 +84,24 @@ enum TipoEventoAuditoria {
   APROBACION_VACACIONES
   RECHAZO_VACACIONES
   SUBIDA_DOCUMENTO
+  DESCARGA_DOCUMENTO
+  ELIMINACION_DOCUMENTO
+  EDUCACION_CREATE
+  EDUCACION_UPDATE
+  EDUCACION_DELETE
+  JOB_CREATE
+  JOB_UPDATE
+  JOB_DELETE
+  REMUNERACION_PUBLISH
+  REMUNERACION_ANULATE
+  VACATION_REQUEST
+  VACATION_APPROVE
+  VACATION_REJECT
+  VACATION_ADJUST
+  VACATION_CHANGE_FECHA_INGRESO
+  OVERTIME_REQUEST
+  OVERTIME_APPROVE
+  OVERTIME_REJECT
   REGISTRO_LICENCIA_MEDICA
   CAMBIO_ESTADO_LABORAL
   ACTUALIZACION_DATOS_PERSONALES
@@ -73,6 +123,7 @@ model Usuario {
   cargo                    String
   area                     String
   estadoLaboral            EstadoLaboral         @default(ACTIVO)
+  saldoVacacionesInicial   Float?
   diasVacacionesAcumulados Float                 @default(0)
   diasVacacionesTomados    Float                 @default(0)
   urlFotoPerfil            String?
@@ -81,13 +132,19 @@ model Usuario {
   updatedAt                DateTime              @updatedAt
 
   documentos               Documento[]
+  educaciones              Educacion[]
+  antecedentesLaborales    AntecedenteLaboral[]
+  remuneraciones           Remuneracion[]
+  horasExtras              HoraExtra[]
   solicitudesVacaciones    SolicitudVacaciones[] @relation("SolicitudesEmpleado")
+  movimientosVacaciones    MovimientoVacaciones[]
   licenciasMedicas         LicenciaMedica[]
   eventosAuditados         EventoAuditoria[]     @relation("EventosPorUsuario")
   solicitudesAprobadas     SolicitudVacaciones[] @relation("SolicitudesAprobador")
   documentosSubidos        Documento[]           @relation("DocumentosSubidos")
   licenciasRegistradas     LicenciaMedica[]      @relation("LicenciasRegistradas")
   tokensRecuperacion       PasswordResetToken[]
+  horasExtrasRevisadas     HoraExtra[]           @relation("HorasExtraRevisadas")
 }
 
 model Documento {
@@ -95,12 +152,78 @@ model Documento {
   empleadoId            String
   empleado              Usuario       @relation(fields: [empleadoId], references: [id])
   tipoDocumento         TipoDocumento
+  visibilidad           VisibilidadDocumento @default(ADMIN_Y_EMPLEADO)
   periodo               String?
   nombreArchivoOriginal String
-  urlArchivo            String
+  storagePath           String
+  mimeType              String
+  sizeBytes             Int
   subidoPorUsuarioId    String
   subidoPor             Usuario       @relation("DocumentosSubidos", fields: [subidoPorUsuarioId], references: [id])
   fechaSubida           DateTime      @default(now())
+
+  educaciones           Educacion[]
+  remuneraciones        Remuneracion[]
+}
+
+model Educacion {
+  id           String   @id @default(cuid())
+  usuarioId    String
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
+  tipo         TipoEducacion
+  institucion  String
+  nombre       String
+  fechaInicio  DateTime?
+  fechaFin     DateTime?
+  estado       EstadoEducacion
+  descripcion  String?
+  documentoId  String?
+  documento    Documento? @relation(fields: [documentoId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AntecedenteLaboral {
+  id          String   @id @default(cuid())
+  usuarioId   String
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  empresa     String
+  cargo       String
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Remuneracion {
+  id          String   @id @default(cuid())
+  usuarioId   String
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  periodo     String
+  fechaPago   DateTime?
+  montoLiquido Float?
+  montoBruto  Float?
+  documentoId String
+  documento   Documento @relation(fields: [documentoId], references: [id])
+  estado      EstadoRemuneracion
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HoraExtra {
+  id                String   @id @default(cuid())
+  usuarioId         String
+  usuario           Usuario  @relation(fields: [usuarioId], references: [id])
+  fecha             DateTime
+  horas             Float
+  motivo            String?
+  estado            EstadoHoraExtra
+  revisadoPorId     String?
+  revisadoPor       Usuario? @relation("HorasExtraRevisadas", fields: [revisadoPorId], references: [id])
+  comentarioRevision String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model SolicitudVacaciones {
@@ -119,6 +242,18 @@ model SolicitudVacaciones {
   comentarioAprobador  String?
   fechaResolucion      DateTime?
   alertaSuperposicion  Boolean                  @default(false)
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+}
+
+model MovimientoVacaciones {
+  id          String   @id @default(cuid())
+  empleadoId  String
+  empleado    Usuario  @relation(fields: [empleadoId], references: [id])
+  tipo        String
+  dias        Float
+  detalle     String?
+  createdAt   DateTime @default(now())
 }
 
 model LicenciaMedica {

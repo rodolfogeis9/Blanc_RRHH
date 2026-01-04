@@ -24,8 +24,9 @@ import { useRef, ChangeEvent } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { fetchMe } from '../../api/me';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { readFileAsDataURL } from '../../utils/file';
+import { downloadBlob, readFileAsDataURL } from '../../utils/file';
 import { formatTenure, getBirthdayCountdown } from '../../utils/date';
+import { downloadDocumentBlob } from '../../api/documents';
 
 const EmployeeDashboard = () => {
   const { data } = useQuery({ queryKey: ['me'], queryFn: fetchMe });
@@ -38,6 +39,10 @@ const EmployeeDashboard = () => {
   const vacacionesTomadas = data?.diasVacacionesTomados ?? 0;
   const totalVacaciones = data?.totalVacaciones ?? 0;
   const progresoVacaciones = totalVacaciones > 0 ? Math.min(100, (vacacionesTomadas / totalVacaciones) * 100) : 0;
+  const pendingVacations = data?.pendingVacationRequests ?? 0;
+  const pendingOvertime = data?.pendingOvertimeRequests ?? 0;
+  const latestOvertime = data?.latestOvertime;
+  const lastRemuneration = data?.lastRemuneration;
 
   const handlePhotoChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,6 +51,16 @@ const EmployeeDashboard = () => {
     setCustomPhoto(dataUrl);
     toast({ title: 'Foto actualizada', description: 'Solo tú puedes verla hasta que RRHH la valide.', status: 'success' });
     event.target.value = '';
+  };
+
+  const handleDownloadLastRemuneration = async () => {
+    if (!lastRemuneration) return;
+    try {
+      const blob = await downloadDocumentBlob(lastRemuneration.documentoId);
+      downloadBlob(blob, lastRemuneration.documento.nombreArchivoOriginal);
+    } catch (error: any) {
+      toast({ title: 'No pudimos descargar la liquidación', description: error?.response?.data?.message, status: 'error' });
+    }
   };
 
   return (
@@ -137,13 +152,39 @@ const EmployeeDashboard = () => {
           <GridItem>
             <Card>
               <CardBody>
-                <Heading size="md" mb={2}>
-                  Últimas novedades
+                <Heading size="md" mb={4}>
+                  Resumen operativo
                 </Heading>
-                <Text color="gray.600">
-                  Próximamente verás aquí tus solicitudes recientes, próximas capacitaciones y alertas. Mientras tanto puedes
-                  revisar cada módulo desde el menú lateral.
-                </Text>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                  <Stat>
+                    <StatLabel>Solicitudes vacaciones pendientes</StatLabel>
+                    <StatNumber>{pendingVacations}</StatNumber>
+                  </Stat>
+                  <Stat>
+                    <StatLabel>Horas extra pendientes</StatLabel>
+                    <StatNumber>{pendingOvertime}</StatNumber>
+                  </Stat>
+                  <Stat>
+                    <StatLabel>Última liquidación</StatLabel>
+                    <StatNumber fontSize="lg">{lastRemuneration?.periodo ?? '—'}</StatNumber>
+                    {lastRemuneration && (
+                      <Button size="sm" mt={2} variant="outline" onClick={handleDownloadLastRemuneration}>
+                        Descargar
+                      </Button>
+                    )}
+                  </Stat>
+                  <Stat>
+                    <StatLabel>Última hora extra</StatLabel>
+                    <StatNumber fontSize="lg">
+                      {latestOvertime ? `${latestOvertime.horas}h` : '—'}
+                    </StatNumber>
+                    {latestOvertime && (
+                      <Text fontSize="sm" color="gray.500">
+                        {new Date(latestOvertime.fecha).toLocaleDateString()} · {latestOvertime.estado}
+                      </Text>
+                    )}
+                  </Stat>
+                </SimpleGrid>
               </CardBody>
             </Card>
           </GridItem>

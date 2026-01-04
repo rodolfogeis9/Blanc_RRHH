@@ -18,6 +18,24 @@ export type EmployeeMeResponse = {
   diasVacacionesTomados: number;
   saldoVacaciones: number;
   totalVacaciones: number;
+  pendingVacationRequests: number;
+  pendingOvertimeRequests: number;
+  lastRemuneration?: {
+    id: string;
+    periodo: string;
+    documentoId: string;
+    documento: {
+      id: string;
+      nombreArchivoOriginal: string;
+      mimeType: string;
+    };
+  } | null;
+  latestOvertime?: {
+    id: string;
+    fecha: string;
+    horas: number;
+    estado: string;
+  } | null;
   resumenPerfilProfesional?: string;
   urlFotoPerfil?: string;
 };

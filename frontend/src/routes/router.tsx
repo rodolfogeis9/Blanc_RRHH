@@ -8,7 +8,10 @@ import EmployeeProfilePage from '../pages/employee/EmployeeProfilePage';
 import EmployeeDocumentsPage from '../pages/employee/EmployeeDocumentsPage';
 import EmployeeVacationsPage from '../pages/employee/EmployeeVacationsPage';
 import EmployeeLicensesPage from '../pages/employee/EmployeeLicensesPage';
-import PlaceholderPage from '../pages/PlaceholderPage';
+import EmployeeEducationPage from '../pages/employee/EmployeeEducationPage';
+import EmployeeWorkHistoryPage from '../pages/employee/EmployeeWorkHistoryPage';
+import EmployeeRemunerationsPage from '../pages/employee/EmployeeRemunerationsPage';
+import EmployeeExtraHoursPage from '../pages/employee/EmployeeExtraHoursPage';
 import AdminEmployeesPage from '../pages/admin/AdminEmployeesPage';
 import AdminVacationsPage from '../pages/admin/AdminVacationsPage';
 import AdminAuditPage from '../pages/admin/AdminAuditPage';
@@ -52,11 +55,10 @@ export const router = createBrowserRouter([
           { path: '/portal/documentos', element: <EmployeeDocumentsPage /> },
           { path: '/portal/vacaciones', element: <EmployeeVacationsPage /> },
           { path: '/portal/licencias', element: <EmployeeLicensesPage /> },
-          // Rutas placeholder
-          { path: '/portal/educacion', element: <PlaceholderPage title="Mis estudios" /> },
-          { path: '/portal/antecedentes-laborales', element: <PlaceholderPage title="Antecedentes Laborales" /> },
-          { path: '/portal/remuneraciones', element: <PlaceholderPage title="Remuneraciones" /> },
-          { path: '/portal/horas-extras', element: <PlaceholderPage title="Horas Extras" /> },
+          { path: '/portal/educacion', element: <EmployeeEducationPage /> },
+          { path: '/portal/antecedentes-laborales', element: <EmployeeWorkHistoryPage /> },
+          { path: '/portal/remuneraciones', element: <EmployeeRemunerationsPage /> },
+          { path: '/portal/horas-extras', element: <EmployeeExtraHoursPage /> },
         ],
       },
       {
@@ -65,8 +67,11 @@ export const router = createBrowserRouter([
           { path: '/admin/dashboard', element: <AdminDashboardPage /> },
           { path: '/admin/empleados', element: <AdminEmployeesPage /> },
           { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
-          { path: '/admin/auditoria', element: <AdminAuditPage /> },
         ],
+      },
+      {
+        element: <ProtectedRoute roles={['ADMIN_DIRECCION']} />,
+        children: [{ path: '/admin/auditoria', element: <AdminAuditPage /> }],
       },
       {
         path: '*',

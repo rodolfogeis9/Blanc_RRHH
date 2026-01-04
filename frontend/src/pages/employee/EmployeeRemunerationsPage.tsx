@@ -6,6 +6,7 @@ import {
   CardBody,
   Heading,
   Select,
+  Spinner,
   Stack,
   Table,
   Tbody,
@@ -14,47 +15,39 @@ import {
   Thead,
   Tr,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-
-interface Payslip {
-  id: string;
-  mes: string;
-  anio: number;
-  estado: 'DISPONIBLE' | 'PROCESO';
-  montoLiquido: number;
-}
-
-const defaultPayslips: Payslip[] = [
-  { id: '1', mes: 'Enero', anio: 2024, estado: 'DISPONIBLE', montoLiquido: 980000 },
-  { id: '2', mes: 'Febrero', anio: 2024, estado: 'DISPONIBLE', montoLiquido: 990500 },
-  { id: '3', mes: 'Marzo', anio: 2024, estado: 'DISPONIBLE', montoLiquido: 1015000 },
-  { id: '4', mes: 'Abril', anio: 2024, estado: 'PROCESO', montoLiquido: 0 },
-  { id: '5', mes: 'Noviembre', anio: 2023, estado: 'DISPONIBLE', montoLiquido: 940000 },
-];
+import { downloadDocumentBlob } from '../../api/documents';
+import { fetchMyRemunerations } from '../../api/remunerations';
+import { downloadBlob } from '../../utils/file';
 
 const EmployeeRemunerationsPage = () => {
-  const [anioSeleccionado, setAnioSeleccionado] = useState<number | 'todos'>('todos');
-  const [estadoSeleccionado, setEstadoSeleccionado] = useState<'todos' | Payslip['estado']>('todos');
+  const [anioSeleccionado, setAnioSeleccionado] = useState<string>('todos');
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<string>('todos');
+  const toast = useToast();
+  const { data, isLoading } = useQuery({ queryKey: ['remuneraciones'], queryFn: fetchMyRemunerations });
 
-  const aniosDisponibles = useMemo(() => Array.from(new Set(defaultPayslips.map((p) => p.anio))), []);
+  const aniosDisponibles = useMemo(() => {
+    if (!data) return [];
+    return Array.from(new Set(data.map((item) => item.periodo.slice(0, 4))));
+  }, [data]);
 
-  const filtradas = defaultPayslips.filter((payslip) => {
-    if (anioSeleccionado !== 'todos' && payslip.anio !== anioSeleccionado) return false;
-    if (estadoSeleccionado !== 'todos' && payslip.estado !== estadoSeleccionado) return false;
+  const filtradas = (data ?? []).filter((item) => {
+    if (anioSeleccionado !== 'todos' && !item.periodo.startsWith(anioSeleccionado)) return false;
+    if (estadoSeleccionado !== 'todos' && item.estado !== estadoSeleccionado) return false;
     return true;
   });
 
-  const handleDownload = (payslip: Payslip) => {
-    const contenido = `Liquidación ${payslip.mes} ${payslip.anio} - Monto líquido: $${payslip.montoLiquido.toLocaleString('es-CL')}`;
-    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Liquidacion_${payslip.mes}_${payslip.anio}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleDownload = async (docId: string, filename: string) => {
+    try {
+      const blob = await downloadDocumentBlob(docId);
+      downloadBlob(blob, filename);
+    } catch (error: any) {
+      toast({ title: 'Error al descargar', description: error?.response?.data?.message, status: 'error' });
+    }
   };
 
   return (
@@ -68,7 +61,7 @@ const EmployeeRemunerationsPage = () => {
               <Select
                 maxW="220px"
                 value={anioSeleccionado}
-                onChange={(event) => setAnioSeleccionado(event.target.value === 'todos' ? 'todos' : Number(event.target.value))}
+                onChange={(event) => setAnioSeleccionado(event.target.value)}
               >
                 <option value="todos">Todos los años</option>
                 {aniosDisponibles.map((anio) => (
@@ -77,56 +70,58 @@ const EmployeeRemunerationsPage = () => {
                   </option>
                 ))}
               </Select>
-              <Select maxW="220px" value={estadoSeleccionado} onChange={(event) => setEstadoSeleccionado(event.target.value as any)}>
+              <Select maxW="220px" value={estadoSeleccionado} onChange={(event) => setEstadoSeleccionado(event.target.value)}>
                 <option value="todos">Todos los estados</option>
-                <option value="DISPONIBLE">Disponible</option>
-                <option value="PROCESO">En proceso</option>
+                <option value="PUBLICADA">Publicada</option>
+                <option value="ANULADA">Anulada</option>
               </Select>
             </Stack>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Mes</Th>
-                  <Th>Año</Th>
-                  <Th>Estado</Th>
-                  <Th>Monto líquido</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {filtradas.map((payslip) => (
-                  <Tr key={payslip.id}>
-                    <Td>{payslip.mes}</Td>
-                    <Td>{payslip.anio}</Td>
-                    <Td>
-                      <Badge colorScheme={payslip.estado === 'DISPONIBLE' ? 'green' : 'yellow'}>{payslip.estado}</Badge>
-                    </Td>
-                    <Td>
-                      {payslip.montoLiquido > 0 ? `$${payslip.montoLiquido.toLocaleString('es-CL')}` : 'Pendiente'}
-                    </Td>
-                    <Td>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownload(payslip)}
-                        isDisabled={payslip.estado !== 'DISPONIBLE'}
-                      >
-                        Descargar
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-                {filtradas.length === 0 && (
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <Table variant="simple">
+                <Thead>
                   <Tr>
-                    <Td colSpan={5} textAlign="center">
-                      No hay documentos para los filtros seleccionados.
-                    </Td>
+                    <Th>Período</Th>
+                    <Th>Estado</Th>
+                    <Th>Monto líquido</Th>
+                    <Th>Monto bruto</Th>
+                    <Th></Th>
                   </Tr>
-                )}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {filtradas.map((item) => (
+                    <Tr key={item.id}>
+                      <Td>{item.periodo}</Td>
+                      <Td>
+                        <Badge colorScheme={item.estado === 'PUBLICADA' ? 'green' : 'red'}>{item.estado}</Badge>
+                      </Td>
+                      <Td>{item.montoLiquido ? `$${item.montoLiquido.toLocaleString('es-CL')}` : '—'}</Td>
+                      <Td>{item.montoBruto ? `$${item.montoBruto.toLocaleString('es-CL')}` : '—'}</Td>
+                      <Td>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDownload(item.documentoId, item.documento.nombreArchivoOriginal)}
+                          isDisabled={item.estado !== 'PUBLICADA'}
+                        >
+                          Descargar
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))}
+                  {filtradas.length === 0 && (
+                    <Tr>
+                      <Td colSpan={5} textAlign="center">
+                        No hay liquidaciones para los filtros seleccionados.
+                      </Td>
+                    </Tr>
+                  )}
+                </Tbody>
+              </Table>
+            )}
             <Box mt={4} fontSize="sm" color="gray.500">
-              Los comprobantes en estado "En proceso" estarán disponibles al cierre contable del mes.
+              Si una liquidación está anulada, consulta con RRHH para revisar el motivo.
             </Box>
           </CardBody>
         </Card>

@@ -31,6 +31,7 @@ Copiar `.env.example` a `.env` y ajustar los valores:
 | `PASSWORD_RESET_TOKEN_MINUTES` | Minutos de validez de los tokens de recuperación. |
 | `GCS_BUCKET` | Bucket de Google Cloud Storage para archivos. Si se deja vacío, se utiliza almacenamiento temporal local. |
 | `GCS_BASE_FOLDER` | Carpeta base dentro del bucket. |
+| `LOCAL_UPLOADS_PATH` | Ruta local para guardar archivos cuando no hay bucket (por defecto `backend/uploads`). |
 | `FRONTEND_BASE_URL` | URL pública del frontend (usada en enlaces de recuperación). |
 | `PORT` | Puerto de escucha del servidor HTTP. |
 
@@ -47,16 +48,19 @@ npm run prisma:studio   # Abre Prisma Studio para inspeccionar datos
 
 ### Esquema de datos
 
-El archivo [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) define los modelos solicitados: usuarios/empleados, documentos, solicitudes de vacaciones, licencias médicas, eventos de auditoría y tokens de recuperación. El saldo de vacaciones se calcula combinando los días acumulados manualmente (`diasVacacionesAcumulados`) y el cálculo automático basado en fecha de ingreso (`1.25` días por mes completo), restando los días consumidos (`diasVacacionesTomados`).
+El archivo [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) define los modelos solicitados: usuarios/empleados, documentos, solicitudes de vacaciones, licencias médicas, educación, antecedentes laborales, remuneraciones, horas extra, eventos de auditoría y tokens de recuperación. El saldo de vacaciones se calcula combinando los días acumulados manualmente (`diasVacacionesAcumulados`), el saldo inicial (`saldoVacacionesInicial`) y el cálculo automático basado en fecha de ingreso (`1.25` días por mes completo), restando los días consumidos (`diasVacacionesTomados`).
 
 ### Principales módulos
 
 * **Autenticación** (`/auth`): login, recuperación y reseteo de contraseña con JWT y tokens de un solo uso.
 * **Empleados** (`/empleados`): perfiles, alta y edición de datos laborales, ajustes manuales de vacaciones.
-* **Documentos** (`/documentos`): subida controlada por tipo y periodo, con validación de formatos (PDF/JPG/PNG) y registro en auditoría.
-* **Solicitudes de vacaciones** (`/solicitudes-vacaciones`): creación por parte del empleado, aprobación/rechazo con impacto en saldo y auditoría.
+* **Documentos** (`/documentos`): subida controlada por categoría, visibilidad y periodo, con validación de formatos (PDF/JPG/PNG), descarga segura y auditoría.
+* **Solicitudes de vacaciones** (`/solicitudes-vacaciones`): creación por parte del empleado, aprobación/rechazo con impacto en saldo, movimientos y auditoría.
 * **Licencias médicas** (`/licencias`): registro con subida de archivos, detección de solapamientos con vacaciones y marca de alerta.
-* **Auditoría** (`/auditoria`): consulta paginada accesible para RRHH y Dirección.
+* **Educación** (`/educacion`) y **Antecedentes laborales** (`/antecedentes-laborales`): CRUD del empleado con registros persistentes.
+* **Remuneraciones** (`/remuneraciones`): publicación de liquidaciones con PDF asociado, consulta por empleado y descarga segura.
+* **Horas extra** (`/horas-extras`): solicitud por parte del empleado y aprobación/rechazo por RRHH/Dirección.
+* **Auditoría** (`/auditoria`): consulta paginada accesible solo para Dirección.
 
 Todos los endpoints están protegidos con middlewares de autenticación y verificación de roles (`ADMIN_RRHH`, `ADMIN_DIRECCION`, `EMPLEADO`).
 
@@ -101,7 +105,7 @@ npm run preview # Sirve el build para validación local
 
 * **Autenticación**: login, flujo de “olvidé mi contraseña” y reseteo.
 * **Portal de empleado**: dashboard, datos personales editables, documentos descargables, solicitudes de vacaciones y licencias médicas.
-* **Portal administrativo**: vistas para RRHH/Dirección con listados de empleados, gestión de solicitudes y consulta de auditoría.
+* **Portal administrativo**: vistas para RRHH/Dirección con listados de empleados, gestión de solicitudes (vacaciones/horas extra), publicación de documentos y remuneraciones, y consulta de auditoría.
 
 Cada vista incluye estados de carga, mensajes claros y acciones visibles en línea con las guías de usabilidad solicitadas.
 
@@ -110,6 +114,8 @@ Cada vista incluye estados de carga, mensajes claros y acciones visibles en lín
 1. Inicia sesión con un usuario ADMIN.
 2. Navega por el menú lateral hacia otras secciones.
 3. Haz clic en **Dashboard** y confirma que mantienes la sesión y el rol ADMIN activos.
+
+Para un checklist detallado revisa [`docs/manual-test.md`](docs/manual-test.md).
 
 ## Despliegue en Google Cloud Platform
 
