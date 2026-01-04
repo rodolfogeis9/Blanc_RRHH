@@ -1,0 +1,9 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" fill="white"/>
+  <path d="M46 20C54 32 54 50 46 68C44 72 40 78 34 80" stroke="#0D3B66" stroke-width="3" stroke-linecap="round"/>
+  <path d="M34 26C38 32 38 40 34 48C32 52 28 58 22 60" stroke="#0D3B66" stroke-width="3" stroke-linecap="round"/>
+  <text x="70" y="55" font-family="'Optima', 'Helvetica Neue', Arial, sans-serif" font-size="42" fill="#0D3B66">BL</text>
+  <path d="M157 30H132V70H157C165 70 172 63 172 55C172 47 165 40 157 40H147V30H157Z" fill="#0D3B66"/>
+  <text x="180" y="55" font-family="'Optima', 'Helvetica Neue', Arial, sans-serif" font-size="42" fill="#0D3B66">NC</text>
+  <text x="70" y="95" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#0D3B66">Plastic and Recovery Center</text>
+</svg>

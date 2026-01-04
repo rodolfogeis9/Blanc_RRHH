@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: blanc_postgres
+    environment:
+      POSTGRES_USER: blancuser
+      POSTGRES_PASSWORD: blancpass
+      POSTGRES_DB: blanc_rrhh
+    ports:
+      - "5432:5432"
+    volumes:
+      - blanc_pg_data:/var/lib/postgresql/data
+
+volumes:
+  blanc_pg_data:
