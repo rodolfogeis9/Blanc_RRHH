@@ -13,6 +13,7 @@ import educationRoutes from './routes/education.routes';
 import jobsRoutes from './routes/jobs.routes';
 import remunerationsRoutes from './routes/remunerations.routes';
 import overtimeRoutes from './routes/overtime.routes';
+import adminRoutes from './routes/admin.routes';
 
 import { errorHandler } from './middleware/error-handler';
 
@@ -37,6 +38,7 @@ app.use('/educacion', educationRoutes);
 app.use('/antecedentes-laborales', jobsRoutes);
 app.use('/remuneraciones', remunerationsRoutes);
 app.use('/horas-extras', overtimeRoutes);
+app.use('/admin', adminRoutes);
 
 app.use(errorHandler);
 

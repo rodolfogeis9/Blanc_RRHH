@@ -8,7 +8,9 @@ import FormTextInput from '../../components/forms/FormTextInput';
 
 const schema = z
   .object({
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    email: z.string().email('Ingresa un correo válido'),
+    code: z.string().min(4, 'Ingresa el código enviado al correo'),
+    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -20,18 +22,17 @@ type FormValues = z.infer<typeof schema>;
 
 const ResetPasswordPage = () => {
   const [params] = useSearchParams();
-  const token = params.get('token');
+  const defaultEmail = params.get('email') ?? '';
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: defaultEmail } });
   const toast = useToast();
 
   const onSubmit = async (values: FormValues) => {
     try {
-      if (!token) throw new Error('Token inválido');
-      await resetPasswordRequest(token, values.password);
+      await resetPasswordRequest(values.email, values.code, values.password);
       toast({ title: 'Contraseña actualizada', description: 'Ya puedes iniciar sesión', status: 'success' });
     } catch (error: any) {
       toast({ title: 'Error al actualizar', description: error?.response?.data?.message ?? error?.message, status: 'error' });
@@ -46,10 +47,12 @@ const ResetPasswordPage = () => {
             <Heading size="lg" color="brand.primary">
               Define tu nueva contraseña
             </Heading>
-            <Text color="gray.600">Recuerda que debe ser segura y difícil de adivinar.</Text>
+            <Text color="gray.600">Ingresa el código recibido y define tu nueva contraseña.</Text>
           </Box>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={4}>
+              <FormTextInput label="Correo electrónico" type="email" {...register('email')} error={errors.email} />
+              <FormTextInput label="Código de verificación" {...register('code')} error={errors.code} />
               <FormTextInput label="Nueva contraseña" type="password" {...register('password')} error={errors.password} />
               <FormTextInput
                 label="Confirmar contraseña"

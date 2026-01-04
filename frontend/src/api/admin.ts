@@ -90,3 +90,50 @@ export const fetchAuditEvents = async (params?: { usuarioId?: string; tipoEvento
   const { data } = await api.get<{ total: number; page: number; pageSize: number; eventos: AuditEvent[] }>('/auditoria', { params });
   return data;
 };
+
+export type JobRole = {
+  id: string;
+  name: string;
+  active: boolean;
+};
+
+export const fetchJobRoles = async () => {
+  const { data } = await api.get<JobRole[]>('/admin/job-roles');
+  return data;
+};
+
+export type InvitationItem = {
+  id: string;
+  email: string;
+  role: Role;
+  jobRoleName: string;
+  createdAt: string;
+  expiresAt: string;
+  usedAt?: string | null;
+  status: 'PENDIENTE' | 'USADA' | 'EXPIRADA';
+  createdBy: {
+    id: string;
+    nombre: string;
+    apellido: string;
+  };
+};
+
+export const fetchInvitations = async () => {
+  const { data } = await api.get<InvitationItem[]>('/admin/invitations');
+  return data;
+};
+
+export const createInvitationRequest = async (payload: { email: string; role: Role; jobRoleId: string }) => {
+  const { data } = await api.post('/admin/invitations', payload);
+  return data;
+};
+
+export const resendInvitationRequest = async (id: string) => {
+  const { data } = await api.post(`/admin/invitations/${id}/resend`);
+  return data;
+};
+
+export const revokeInvitationRequest = async (id: string) => {
+  const { data } = await api.post(`/admin/invitations/${id}/revoke`);
+  return data;
+};

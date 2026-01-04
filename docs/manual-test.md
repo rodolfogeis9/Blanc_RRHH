@@ -1,43 +1,43 @@
-# Manual de pruebas (smoke test)
+# Manual Test - Invitaciones y Recuperación de Contraseña
 
 ## Preparación
-1. Levanta backend (`npm run dev` en `/backend`).
-2. Levanta frontend (`npm run dev` en `/frontend`).
-3. Asegura usuarios de prueba:
-   - ADMIN_DIRECCION / ADMIN_RRHH con JWT válido.
-   - EMPLEADO asignado a esos admins.
+- Configurar variables de entorno de correo:
+  - `SENDGRID_API_KEY`
+  - `SENDGRID_FROM`
+- Configurar `FRONTEND_BASE_URL` en backend (ej: `http://localhost:5173`).
+- Asegurar `INVITATION_TOKEN_HOURS` y `PASSWORD_RESET_TOKEN_MINUTES` según política.
 
-## Casos principales
+## Flujo 1: Invitación de usuario por admin
+1. Inicia sesión como `ADMIN_RRHH` o `ADMIN_DIRECCION`.
+2. Navega a **Admin → Invitaciones**.
+3. Completa el formulario con:
+   - Correo válido
+   - Rol del sistema
+   - Cargo clínico
+4. Envía la invitación y verifica:
+   - Toast de éxito
+   - Registro en tabla de invitaciones con estado **PENDIENTE**
+   - Email recibido con el enlace `/invite?token=...`
+5. Abre el enlace de invitación y completa el formulario de alta con datos requeridos.
+6. Verifica que:
+   - El usuario se crea con el rol/cargo correctos.
+   - Se puede iniciar sesión en `/login`.
+   - En auditoría exista evento `INVITATION_CREATE` y `INVITATION_ACCEPT`.
+7. Prueba expiración:
+   - Ajusta `INVITATION_TOKEN_HOURS` a un valor corto y espera.
+   - El enlace debe indicar invitación inválida.
 
-### 1) Educación y antecedentes (Empleado)
-1. Inicia sesión como EMPLEADO.
-2. Ve a **Mis estudios** y crea un registro.
-3. Edita el registro y verifica que aparece en la tabla.
-4. Elimina el registro y valida que se removió.
-5. Ve a **Mis antecedentes laborales** y repite el flujo.
-
-### 2) Liquidaciones (Admin → Empleado)
-1. Inicia sesión como ADMIN.
-2. En **Empleados**, selecciona un colaborador y abre **Remuneraciones**.
-3. Sube un PDF con periodo `YYYY-MM`.
-4. Cambia a EMPLEADO y entra en **Remuneraciones**.
-5. Descarga la liquidación y verifica que el archivo se abre.
-
-### 3) Vacaciones (Empleado → Admin)
-1. Como EMPLEADO, crea una solicitud de vacaciones.
-2. Como ADMIN, entra en **Solicitudes** y aprueba la solicitud.
-3. Vuelve al portal del empleado y verifica que el saldo se descuenta.
-
-### 4) Horas extra (Empleado → Admin)
-1. Como EMPLEADO, registra horas extra.
-2. Como ADMIN, entra en **Solicitudes** → **Horas extra** y aprueba.
-3. Vuelve al portal del empleado y valida el estado aprobado.
-
-### 5) Documentos privados
-1. Como ADMIN, sube un documento con visibilidad `SOLO_ADMIN`.
-2. Como EMPLEADO, verifica que no aparece en **Mis documentos**.
-3. Como ADMIN, verifica que sí aparece en la lista del colaborador.
-
-## Evidencias recomendadas
-- Capturas de tablas con registros creados.
-- Descarga exitosa desde `/documentos/:id/download`.
+## Flujo 2: Recuperación de contraseña
+1. Ir a `/forgot-password` y enviar un correo válido.
+2. Verificar:
+   - Mensaje genérico de éxito.
+   - Email recibido con código OTP.
+3. Ir a `/reset-password` e ingresar:
+   - Email
+   - Código recibido
+   - Nueva contraseña (>= 8 caracteres)
+4. Verificar:
+   - Contraseña actualizada.
+   - Login exitoso con nueva contraseña.
+   - Evento de auditoría `PASSWORD_RESET_REQUEST` y `PASSWORD_RESET_SUCCESS`.
+5. Ingresar código inválido varias veces para validar bloqueo y mensajes genéricos.
