@@ -8,6 +8,7 @@ import EmployeeProfilePage from '../pages/employee/EmployeeProfilePage';
 import EmployeeDocumentsPage from '../pages/employee/EmployeeDocumentsPage';
 import EmployeeVacationsPage from '../pages/employee/EmployeeVacationsPage';
 import EmployeeLicensesPage from '../pages/employee/EmployeeLicensesPage';
+import PlaceholderPage from '../pages/PlaceholderPage';
 import AdminEmployeesPage from '../pages/admin/AdminEmployeesPage';
 import AdminVacationsPage from '../pages/admin/AdminVacationsPage';
 import AdminAuditPage from '../pages/admin/AdminAuditPage';
@@ -51,6 +52,11 @@ export const router = createBrowserRouter([
           { path: '/portal/documentos', element: <EmployeeDocumentsPage /> },
           { path: '/portal/vacaciones', element: <EmployeeVacationsPage /> },
           { path: '/portal/licencias', element: <EmployeeLicensesPage /> },
+          // Rutas placeholder
+          { path: '/portal/educacion', element: <PlaceholderPage title="Mis estudios" /> },
+          { path: '/portal/antecedentes-laborales', element: <PlaceholderPage title="Antecedentes Laborales" /> },
+          { path: '/portal/remuneraciones', element: <PlaceholderPage title="Remuneraciones" /> },
+          { path: '/portal/horas-extras', element: <PlaceholderPage title="Horas Extras" /> },
         ],
       },
       {
