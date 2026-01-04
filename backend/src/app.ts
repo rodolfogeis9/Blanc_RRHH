@@ -9,6 +9,10 @@ import documentRoutes from './routes/documents.routes';
 import vacationRoutes from './routes/vacations.routes';
 import licenseRoutes from './routes/licenses.routes';
 import auditRoutes from './routes/audit.routes';
+import educationRoutes from './routes/education.routes';
+import jobsRoutes from './routes/jobs.routes';
+import remunerationsRoutes from './routes/remunerations.routes';
+import overtimeRoutes from './routes/overtime.routes';
 
 import { errorHandler } from './middleware/error-handler';
 
@@ -29,6 +33,10 @@ app.use('/documentos', documentRoutes);
 app.use('/solicitudes-vacaciones', vacationRoutes);
 app.use('/licencias', licenseRoutes);
 app.use('/auditoria', auditRoutes);
+app.use('/educacion', educationRoutes);
+app.use('/antecedentes-laborales', jobsRoutes);
+app.use('/remuneraciones', remunerationsRoutes);
+app.use('/horas-extras', overtimeRoutes);
 
 app.use(errorHandler);
 

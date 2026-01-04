@@ -16,8 +16,8 @@ const Sidebar = () => {
     { to: '/portal/remuneraciones', label: 'Remuneraciones', roles: ['EMPLEADO'] },
     { to: '/portal/horas-extras', label: 'Horas extras', roles: ['EMPLEADO'] },
     { to: '/admin/empleados', label: 'Empleados', roles: ['ADMIN_RRHH', 'ADMIN_DIRECCION'] },
-    { to: '/admin/solicitudes', label: 'Solicitudes de vacaciones', roles: ['ADMIN_RRHH', 'ADMIN_DIRECCION'] },
-    { to: '/admin/auditoria', label: 'Auditoría', roles: ['ADMIN_RRHH', 'ADMIN_DIRECCION'] },
+    { to: '/admin/solicitudes', label: 'Solicitudes', roles: ['ADMIN_RRHH', 'ADMIN_DIRECCION'] },
+    { to: '/admin/auditoria', label: 'Auditoría', roles: ['ADMIN_DIRECCION'] },
   ];
 
   return (

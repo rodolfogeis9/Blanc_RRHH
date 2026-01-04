@@ -51,7 +51,7 @@ export const createLicense = async (
   const inicio = dayjs(data.fechaInicio).toDate();
   const fin = dayjs(data.fechaFin).toDate();
 
-  const url = await storageService.uploadFile({
+  const stored = await storageService.uploadFile({
     buffer: file.buffer,
     filename: file.originalname,
     mimetype: file.mimetype,
@@ -64,7 +64,7 @@ export const createLicense = async (
       fechaInicio: inicio,
       fechaFin: fin,
       tipo: data.tipo,
-      urlArchivoLicencia: url,
+      urlArchivoLicencia: stored.storagePath,
       observaciones: data.observaciones,
       creadoPorUsuarioId: actorId,
     },

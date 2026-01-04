@@ -65,7 +65,7 @@ export const createVacationRequest = async (
     throw new AppError('No tienes saldo suficiente de vacaciones', 400);
   }
 
-  return prisma.solicitudVacaciones.create({
+  const solicitud = await prisma.solicitudVacaciones.create({
     data: {
       empleadoId,
       tipoSolicitud: data.tipoSolicitud,
@@ -75,6 +75,18 @@ export const createVacationRequest = async (
       comentarioEmpleado: data.comentarioEmpleado,
     },
   });
+
+  await prisma.eventoAuditoria.create({
+    data: {
+      usuarioId: empleadoId,
+      tipoEvento: 'VACATION_REQUEST',
+      entidadAfectada: 'SolicitudVacaciones',
+      entidadId: solicitud.id,
+      detalle: `Solicitud creada por ${dias} días`,
+    },
+  });
+
+  return solicitud;
 };
 
 export const approveVacation = async (
@@ -86,7 +98,8 @@ export const approveVacation = async (
   if (actorRole === 'EMPLEADO') {
     throw new ForbiddenError();
   }
-  return handleVacationApproval(solicitudId, aprobadorId, comentario);
+  const allowNegative = actorRole === 'ADMIN_DIRECCION';
+  return handleVacationApproval(solicitudId, aprobadorId, comentario, allowNegative);
 };
 
 export const rejectVacation = async (

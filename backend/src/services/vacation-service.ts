@@ -13,12 +13,14 @@ export const calculateAccruedVacationDays = (entryDate: Date, today = new Date()
 
 export const getEmployeeVacationBalance = (employee: {
   fechaIngreso: Date;
+  saldoVacacionesInicial?: number | null;
   diasVacacionesAcumulados: number;
   diasVacacionesTomados: number;
 }) => {
   const autoAccrued = calculateAccruedVacationDays(employee.fechaIngreso);
+  const saldoInicial = employee.saldoVacacionesInicial ?? 0;
   const manualAccrued = employee.diasVacacionesAcumulados;
-  const totalAccrued = Number((autoAccrued + manualAccrued).toFixed(2));
+  const totalAccrued = Number((autoAccrued + manualAccrued + saldoInicial).toFixed(2));
   const taken = employee.diasVacacionesTomados;
   const balance = Number((totalAccrued - taken).toFixed(2));
   return { totalAccrued, taken, balance };
@@ -26,7 +28,7 @@ export const getEmployeeVacationBalance = (employee: {
 
 export const adjustVacationDays = async (
   empleadoId: string,
-  data: { diasVacacionesAcumulados?: number; diasVacacionesTomados?: number }
+  data: { diasVacacionesAcumulados?: number; diasVacacionesTomados?: number; saldoVacacionesInicial?: number | null }
 ) => {
   const empleado = await prisma.usuario.findUnique({ where: { id: empleadoId } });
   if (!empleado) {
@@ -38,6 +40,16 @@ export const adjustVacationDays = async (
     data: {
       diasVacacionesAcumulados: data.diasVacacionesAcumulados ?? empleado.diasVacacionesAcumulados,
       diasVacacionesTomados: data.diasVacacionesTomados ?? empleado.diasVacacionesTomados,
+      saldoVacacionesInicial: data.saldoVacacionesInicial ?? empleado.saldoVacacionesInicial,
+    },
+  });
+
+  await prisma.movimientoVacaciones.create({
+    data: {
+      empleadoId,
+      tipo: 'AJUSTE',
+      dias: data.diasVacacionesAcumulados ?? 0,
+      detalle: 'Ajuste manual de vacaciones',
     },
   });
 
@@ -47,7 +59,8 @@ export const adjustVacationDays = async (
 export const handleVacationApproval = async (
   solicitudId: string,
   aprobadorId: string,
-  comentario?: string
+  comentario?: string,
+  allowNegativeBalance = false
 ) => {
   const solicitud = await prisma.solicitudVacaciones.findUnique({
     where: { id: solicitudId },
@@ -63,7 +76,7 @@ export const handleVacationApproval = async (
   }
 
   const balance = getEmployeeVacationBalance(solicitud.empleado);
-  if (balance.balance < solicitud.cantidadDias) {
+  if (balance.balance < solicitud.cantidadDias && !allowNegativeBalance) {
     throw new AppError('El empleado no tiene saldo suficiente de vacaciones', 400);
   }
 
@@ -86,10 +99,19 @@ export const handleVacationApproval = async (
       },
     });
 
+    await tx.movimientoVacaciones.create({
+      data: {
+        empleadoId: solicitud.empleadoId,
+        tipo: 'DESCUENTO',
+        dias: solicitud.cantidadDias,
+        detalle: `Solicitud aprobada ${solicitudId}`,
+      },
+    });
+
     await tx.eventoAuditoria.create({
       data: {
         usuarioId: aprobadorId,
-        tipoEvento: 'APROBACION_VACACIONES',
+        tipoEvento: 'VACATION_APPROVE',
         entidadAfectada: 'SolicitudVacaciones',
         entidadId: solicitudId,
         detalle: `Solicitud aprobada por ${solicitud.cantidadDias} días. Comentario: ${comentario ?? 'sin comentario'}`,
@@ -129,7 +151,7 @@ export const handleVacationRejection = async (
   await prisma.eventoAuditoria.create({
     data: {
       usuarioId: aprobadorId,
-      tipoEvento: 'RECHAZO_VACACIONES',
+      tipoEvento: 'VACATION_REJECT',
       entidadAfectada: 'SolicitudVacaciones',
       entidadId: solicitudId,
       detalle: `Solicitud rechazada. Comentario: ${comentario ?? 'sin comentario'}`,

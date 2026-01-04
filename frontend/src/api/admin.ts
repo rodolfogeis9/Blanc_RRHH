@@ -10,10 +10,31 @@ export type EmployeeListItem = {
   estadoLaboral: string;
   fechaIngreso: string;
   saldoVacaciones: number;
+  saldoVacacionesInicial?: number | null;
+  diasVacacionesAcumulados: number;
+  diasVacacionesTomados: number;
 };
 
 export const fetchEmployees = async (params?: { nombre?: string; area?: string; estadoLaboral?: string }) => {
   const { data } = await api.get<EmployeeListItem[]>('/empleados', { params });
+  return data;
+};
+
+export const updateEmployeeFechaIngreso = async (employeeId: string, fechaIngreso: string) => {
+  const { data } = await api.put(`/empleados/${employeeId}/fecha-ingreso`, { fechaIngreso });
+  return data;
+};
+
+export const updateEmployeeVacationSaldoInicial = async (employeeId: string, saldoVacacionesInicial: number) => {
+  const { data } = await api.put(`/empleados/${employeeId}/vacaciones/saldo-inicial`, { saldoVacacionesInicial });
+  return data;
+};
+
+export const adjustEmployeeVacationBalance = async (
+  employeeId: string,
+  payload: { diasVacacionesAcumulados?: number; diasVacacionesTomados?: number; saldoVacacionesInicial?: number }
+) => {
+  const { data } = await api.put(`/empleados/${employeeId}/vacaciones`, payload);
   return data;
 };
 
