@@ -56,6 +56,7 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute roles={['ADMIN_DIRECCION', 'ADMIN_RRHH']} />,
         children: [
+          { path: '/admin/dashboard', element: <AdminDashboardPage /> },
           { path: '/admin/empleados', element: <AdminEmployeesPage /> },
           { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
           { path: '/admin/auditoria', element: <AdminAuditPage /> },
@@ -66,18 +67,5 @@ export const router = createBrowserRouter([
         element: <Navigate to="/login" replace />,
       },
     ],
-  },
-  {
-    element: <ProtectedRoute roles={['ADMIN_DIRECCION', 'ADMIN_RRHH']} />,
-    children: [
-      { path: '/admin/dashboard', element: <AdminDashboardPage /> },
-      { path: '/admin/empleados', element: <AdminEmployeesPage /> },
-      { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
-      { path: '/admin/auditoria', element: <AdminAuditPage /> },
-    ],
-  },
-  {
-    path: '*',
-    element: <Navigate to="/login" replace />,
   },
 ]);
