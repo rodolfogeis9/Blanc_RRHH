@@ -21,6 +21,33 @@ export const forgotPasswordRequest = async (email: string) => {
   await api.post('/auth/forgot-password', { email });
 };
 
-export const resetPasswordRequest = async (token: string, password: string) => {
-  await api.post('/auth/reset-password', { token, password });
+export const resetPasswordRequest = async (email: string, code: string, password: string) => {
+  await api.post('/auth/reset-password', { email, code, password });
+};
+
+export type InvitationValidation = {
+  email: string;
+  role: Role;
+  jobRoleName: string;
+};
+
+export const validateInvitationRequest = async (token: string) => {
+  const { data } = await api.get<InvitationValidation>('/auth/invitations/validate', { params: { token } });
+  return data;
+};
+
+export const acceptInvitationRequest = async (payload: {
+  token: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  rut: string;
+  fechaNacimiento: string;
+  telefono: string;
+  direccion: string;
+  fechaIngreso: string;
+  area: string;
+}) => {
+  const { data } = await api.post('/auth/invitations/accept', payload);
+  return data;
 };

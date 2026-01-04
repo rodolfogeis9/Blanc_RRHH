@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
+import InviteAcceptPage from '../pages/auth/InviteAcceptPage';
 import ProtectedRoute from './ProtectedRoute';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import EmployeeProfilePage from '../pages/employee/EmployeeProfilePage';
@@ -16,6 +17,7 @@ import AdminEmployeesPage from '../pages/admin/AdminEmployeesPage';
 import AdminVacationsPage from '../pages/admin/AdminVacationsPage';
 import AdminAuditPage from '../pages/admin/AdminAuditPage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import AdminInvitationsPage from '../pages/admin/AdminInvitationsPage';
 import { AuthProvider } from '../context/AuthContext';
 
 // Root layout component that provides AuthContext to all routes
@@ -48,6 +50,10 @@ export const router = createBrowserRouter([
         element: <ResetPasswordPage />,
       },
       {
+        path: '/invite',
+        element: <InviteAcceptPage />,
+      },
+      {
         element: <ProtectedRoute roles={['EMPLEADO']} />,
         children: [
           { path: '/portal', element: <EmployeeDashboard /> },
@@ -66,6 +72,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin/dashboard', element: <AdminDashboardPage /> },
           { path: '/admin/empleados', element: <AdminEmployeesPage /> },
+          { path: '/admin/invitaciones', element: <AdminInvitationsPage /> },
           { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
         ],
       },

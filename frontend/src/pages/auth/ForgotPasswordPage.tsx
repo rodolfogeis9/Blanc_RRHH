@@ -39,7 +39,7 @@ const ForgotPasswordPage = () => {
             <Heading size="lg" color="brand.primary">
               Recuperar contraseña
             </Heading>
-            <Text color="gray.600">Ingresa tu correo y te enviaremos un enlace seguro.</Text>
+            <Text color="gray.600">Ingresa tu correo y te enviaremos un código de verificación.</Text>
           </Box>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={4}>
