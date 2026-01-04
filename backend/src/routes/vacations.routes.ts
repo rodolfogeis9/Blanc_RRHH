@@ -12,7 +12,7 @@ import { AppError } from '../utils/errors';
 
 const router = Router();
 
-router.get('/mias', authenticate, async (req: AuthenticatedRequest, res, next) => {
+const listOwnHandler = async (req: AuthenticatedRequest, res: any, next: any) => {
   try {
     if (!req.user) throw new AppError('No autenticado', 401);
     const solicitudes = await listOwnVacationRequests(req.user.id);
@@ -20,7 +20,10 @@ router.get('/mias', authenticate, async (req: AuthenticatedRequest, res, next) =
   } catch (error) {
     next(error);
   }
-});
+};
+
+router.get('/mias', authenticate, requireRoles(['EMPLEADO']), listOwnHandler);
+router.get('/me', authenticate, requireRoles(['EMPLEADO']), listOwnHandler);
 
 router.get('/', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH']), async (req, res, next) => {
   try {
@@ -43,7 +46,18 @@ const createSchema = z.object({
   comentarioEmpleado: z.string().optional(),
 });
 
-router.post('/', authenticate, async (req: AuthenticatedRequest, res, next) => {
+router.post('/', authenticate, requireRoles(['EMPLEADO']), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) throw new AppError('No autenticado', 401);
+    const payload = createSchema.parse(req.body);
+    const solicitud = await createVacationRequest(req.user.id, payload);
+    res.status(201).json(solicitud);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/request', authenticate, requireRoles(['EMPLEADO']), async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) throw new AppError('No autenticado', 401);
     const payload = createSchema.parse(req.body);

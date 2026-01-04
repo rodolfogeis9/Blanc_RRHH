@@ -4,7 +4,7 @@ import { listAuditEvents } from '../modules/audit/audit.service';
 
 const router = Router();
 
-router.get('/', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH']), async (req, res, next) => {
+router.get('/', authenticate, requireRoles(['ADMIN_DIRECCION']), async (req, res, next) => {
   try {
     const page = req.query.page ? Number(req.query.page) : 1;
     const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 20;

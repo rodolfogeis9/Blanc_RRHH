@@ -2,7 +2,13 @@ import { Router } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
 import { authenticate, AuthenticatedRequest, requireRoles } from '../middleware/auth';
-import { listOwnDocuments, listEmployeeDocuments, uploadDocument } from '../modules/documents/documents.service';
+import {
+  listOwnDocuments,
+  listEmployeeDocuments,
+  uploadDocument,
+  getDocumentForDownload,
+  deleteDocument,
+} from '../modules/documents/documents.service';
 import { AppError } from '../utils/errors';
 
 const upload = multer({
@@ -18,7 +24,7 @@ const upload = multer({
 
 const router = Router();
 
-router.get('/mios', authenticate, async (req: AuthenticatedRequest, res, next) => {
+const listHandler = async (req: AuthenticatedRequest, res: any, next: any) => {
   try {
     if (!req.user) throw new AppError('No autenticado', 401);
     const filters = {
@@ -30,7 +36,10 @@ router.get('/mios', authenticate, async (req: AuthenticatedRequest, res, next) =
   } catch (error) {
     next(error);
   }
-});
+};
+
+router.get('/mios', authenticate, requireRoles(['EMPLEADO']), listHandler);
+router.get('/me', authenticate, requireRoles(['EMPLEADO']), listHandler);
 
 router.get('/empleados/:id', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH']), async (req, res, next) => {
   try {
@@ -46,8 +55,20 @@ router.get('/empleados/:id', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADM
 });
 
 const uploadSchema = z.object({
-  tipoDocumento: z.enum(['CONTRATO', 'ANEXO', 'LIQUIDACION', 'ESTUDIO', 'OTRO']),
+  tipoDocumento: z.enum([
+    'CONTRATO',
+    'ANEXO',
+    'LIQUIDACION',
+    'ESTUDIO',
+    'LEGAL',
+    'CAPACITACION',
+    'MANUAL',
+    'CONSENTIMIENTO',
+    'CERTIFICADO',
+    'OTRO',
+  ]),
   periodo: z.string().optional(),
+  visibilidad: z.enum(['SOLO_ADMIN', 'ADMIN_Y_EMPLEADO']).optional(),
 });
 
 router.post(
@@ -69,5 +90,27 @@ router.post(
     }
   }
 );
+
+router.get('/:id/download', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) throw new AppError('No autenticado', 401);
+    const { documento, resolvedPath } = await getDocumentForDownload(req.params.id, req.user.id, req.user.role);
+    res.setHeader('Content-Type', documento.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${documento.nombreArchivoOriginal}"`);
+    res.sendFile(resolvedPath);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/:id', authenticate, requireRoles(['ADMIN_DIRECCION', 'ADMIN_RRHH']), async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) throw new AppError('No autenticado', 401);
+    const removed = await deleteDocument(req.params.id, req.user.id);
+    res.json(removed);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

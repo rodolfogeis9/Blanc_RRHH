@@ -19,5 +19,6 @@ export const env = {
   passwordResetTokenMinutes: Number(process.env.PASSWORD_RESET_TOKEN_MINUTES ?? 60),
   gcsBucket: process.env.GCS_BUCKET ?? '',
   gcsBaseFolder: process.env.GCS_BASE_FOLDER ?? 'uploads',
-  frontendBaseUrl: process.env.FRONTEND_BASE_URL ?? 'http://localhost:5173'
+  localUploadsPath: process.env.LOCAL_UPLOADS_PATH ?? 'backend/uploads',
+  frontendBaseUrl: process.env.FRONTEND_BASE_URL ?? 'http://localhost:5173',
 };

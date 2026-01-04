@@ -13,18 +13,39 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { DocumentItem, fetchMyDocuments } from '../../api/documents';
+import { DocumentItem, downloadDocumentBlob, fetchMyDocuments } from '../../api/documents';
+import { downloadBlob, openBlobInNewTab } from '../../utils/file';
 
 const EmployeeDocumentsPage = () => {
   const [tipoDocumento, setTipoDocumento] = useState<string>('');
+  const toast = useToast();
   const { data, isLoading } = useQuery({
     queryKey: ['documents', tipoDocumento],
     queryFn: () => fetchMyDocuments({ tipoDocumento: tipoDocumento || undefined }),
   });
+
+  const handleDownload = async (doc: DocumentItem) => {
+    try {
+      const blob = await downloadDocumentBlob(doc.id);
+      downloadBlob(blob, doc.nombreArchivoOriginal);
+    } catch (error: any) {
+      toast({ title: 'Error al descargar', description: error?.response?.data?.message, status: 'error' });
+    }
+  };
+
+  const handlePreview = async (doc: DocumentItem) => {
+    try {
+      const blob = await downloadDocumentBlob(doc.id);
+      openBlobInNewTab(blob);
+    } catch (error: any) {
+      toast({ title: 'Error al previsualizar', description: error?.response?.data?.message, status: 'error' });
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -42,6 +63,11 @@ const EmployeeDocumentsPage = () => {
               <option value="ANEXO">Anexos</option>
               <option value="LIQUIDACION">Liquidaciones</option>
               <option value="ESTUDIO">Estudios</option>
+              <option value="LEGAL">Legal</option>
+              <option value="CAPACITACION">Capacitación</option>
+              <option value="MANUAL">Manuales</option>
+              <option value="CONSENTIMIENTO">Consentimientos</option>
+              <option value="CERTIFICADO">Certificados</option>
               <option value="OTRO">Otros</option>
             </Select>
           </HStack>
@@ -68,9 +94,16 @@ const EmployeeDocumentsPage = () => {
                     <Td>{doc.periodo ?? '-'}</Td>
                     <Td>{new Date(doc.fechaSubida).toLocaleDateString()}</Td>
                     <Td>
-                      <Button as="a" href={doc.urlArchivo} target="_blank" rel="noreferrer" size="sm" variant="outline">
-                        Descargar
-                      </Button>
+                      <HStack>
+                        <Button size="sm" variant="outline" onClick={() => handleDownload(doc)}>
+                          Descargar
+                        </Button>
+                        {(doc.mimeType.includes('pdf') || doc.mimeType.startsWith('image/')) && (
+                          <Button size="sm" variant="ghost" onClick={() => handlePreview(doc)}>
+                            Ver
+                          </Button>
+                        )}
+                      </HStack>
                     </Td>
                   </Tr>
                 ))}
