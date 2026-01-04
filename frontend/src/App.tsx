@@ -20,6 +20,7 @@ import EmployeeExtraHoursPage from "./pages/employee/EmployeeExtraHoursPage";
 import AdminEmployeesPage from "./pages/admin/AdminEmployeesPage";
 import AdminVacationsPage from "./pages/admin/AdminVacationsPage";
 import AdminAuditPage from "./pages/admin/AdminAuditPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
 
         {/* Portal administración */}
         <Route element={<ProtectedRoute roles={['ADMIN_RRHH', 'ADMIN_DIRECCION']} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/empleados" element={<AdminEmployeesPage />} />
           <Route path="/admin/solicitudes" element={<AdminVacationsPage />} />
           <Route path="/admin/auditoria" element={<AdminAuditPage />} />

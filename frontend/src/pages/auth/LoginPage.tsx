@@ -65,7 +65,7 @@ const LoginPage = () => {
       if (data.usuario.rol === 'EMPLEADO') {
         navigate('/portal');
       } else {
-        navigate('/admin/empleados');
+        navigate('/admin/dashboard');
       }
       toast({ title: 'Bienvenido nuevamente', status: 'success', duration: 3000 });
     } catch (error: any) {

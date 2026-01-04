@@ -8,9 +8,11 @@ import EmployeeProfilePage from '../pages/employee/EmployeeProfilePage';
 import EmployeeDocumentsPage from '../pages/employee/EmployeeDocumentsPage';
 import EmployeeVacationsPage from '../pages/employee/EmployeeVacationsPage';
 import EmployeeLicensesPage from '../pages/employee/EmployeeLicensesPage';
+import PlaceholderPage from '../pages/PlaceholderPage';
 import AdminEmployeesPage from '../pages/admin/AdminEmployeesPage';
 import AdminVacationsPage from '../pages/admin/AdminVacationsPage';
 import AdminAuditPage from '../pages/admin/AdminAuditPage';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import { AuthProvider } from '../context/AuthContext';
 
 // Root layout component that provides AuthContext to all routes
@@ -50,11 +52,17 @@ export const router = createBrowserRouter([
           { path: '/portal/documentos', element: <EmployeeDocumentsPage /> },
           { path: '/portal/vacaciones', element: <EmployeeVacationsPage /> },
           { path: '/portal/licencias', element: <EmployeeLicensesPage /> },
+          // Rutas placeholder
+          { path: '/portal/educacion', element: <PlaceholderPage title="Mis estudios" /> },
+          { path: '/portal/antecedentes-laborales', element: <PlaceholderPage title="Antecedentes Laborales" /> },
+          { path: '/portal/remuneraciones', element: <PlaceholderPage title="Remuneraciones" /> },
+          { path: '/portal/horas-extras', element: <PlaceholderPage title="Horas Extras" /> },
         ],
       },
       {
         element: <ProtectedRoute roles={['ADMIN_DIRECCION', 'ADMIN_RRHH']} />,
         children: [
+          { path: '/admin/dashboard', element: <AdminDashboardPage /> },
           { path: '/admin/empleados', element: <AdminEmployeesPage /> },
           { path: '/admin/solicitudes', element: <AdminVacationsPage /> },
           { path: '/admin/auditoria', element: <AdminAuditPage /> },
